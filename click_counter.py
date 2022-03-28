@@ -1,14 +1,16 @@
-import requests
 import argparse
+from urllib import response
 from urllib.parse import urlparse
+
+import requests
 from environs import Env
 
 
-def shorten_link(token, url):
-    api_token = {'Authorization': f'Bearer {token}'}
-    payload = {'long_url': url}
+def shorten_link(token, url, domain):
+    headers = {'Authorization': f'Bearer {token}'}
+    payload = {'long_url':url, 'domain':domain}
     bitlinks_url  = 'https://api-ssl.bitly.com/v4/bitlinks'
-    response = requests.post(bitlinks_url, json=payload, headers=api_token)
+    response = requests.post(bitlinks_url, json=payload, headers=headers)
     response.raise_for_status()
     return response.json()['link']
 
@@ -40,21 +42,29 @@ def parse_user_input():
     return args
 
 
+def validate_link(url):
+    response = requests.get(url)
+    response.raise_for_status()
+    return response.ok
+
+
 if __name__=='__main__':
     env = Env()
     env.read_env()
-    token = env.str('TOKEN')
+    token = env.str('BITLY_TOKEN')
+    domain = env.str('DOMAIN', 'bit.ly')
     user_input = parse_user_input()
     url = user_input.url
-    if is_bitlink(url):
-        try:
-            total_clicks = count_clicks(token, url)
-            print('Clicks', total_clicks)
-        except requests.exceptions.HTTPError:
-            print('Incorect link')
-    else:
-        try:
-            link = shorten_link(token, url)
+    try:
+        validate_link(url)
+        if is_bitlink(url):
+            try:
+                total_clicks = count_clicks(token, url)
+                print('Clicks', total_clicks)
+            except requests.exceptions.HTTPError:
+                print('Incorect link')
+        else:
+            link = shorten_link(token, url, domain)
             print('Битлинк', link)
-        except requests.exceptions.HTTPError:
-            print('Incorect link')        
+    except requests.exceptions.ConnectionError as e:
+        print(' Incorect link', '\n', f'Error: {e}')
