@@ -19,9 +19,9 @@ def count_clicks(token, link):
     parsed = urlparse(link)
     clean_link = f'{parsed.netloc}{parsed.path}'
     bitlinks_url  = f'https://api-ssl.bitly.com/v4/bitlinks/{clean_link}/clicks/summary'
-    api_token = {'Authorization': f'Bearer {token}'}
-    payload = {'unit': 'day', 'units': '-1'}
-    response = requests.get(bitlinks_url, params=payload, headers=api_token)
+    headers = {'Authorization': f'Bearer {token}'}
+    params = {'unit': 'day', 'units': '-1'}
+    response = requests.get(bitlinks_url, params=params, headers=headers)
     response.raise_for_status()
     return response.json()["total_clicks"]
 
@@ -30,8 +30,8 @@ def is_bitlink(url):
     parsed = urlparse(url)
     clean_link = f'{parsed.netloc}{parsed.path}'
     bitlinks_url  = f'https://api-ssl.bitly.com/v4/bitlinks/{clean_link}'
-    api_token = {'Authorization': f'Bearer {token}'}
-    response = requests.get(bitlinks_url, headers=api_token)
+    headers = {'Authorization': f'Bearer {token}'}
+    response = requests.get(bitlinks_url, headers=headers)
     return response.ok
 
 
