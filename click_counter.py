@@ -26,7 +26,7 @@ def count_clicks(token, link):
     return response.json()["total_clicks"]
 
 
-def is_bitlink(url):
+def is_bitlink(token, url):
     parsed = urlparse(url)
     clean_link = f'{parsed.netloc}{parsed.path}'
     bitlinks_url  = f'https://api-ssl.bitly.com/v4/bitlinks/{clean_link}'
@@ -56,7 +56,7 @@ if __name__=='__main__':
     url = user_input.url
     try:
         validate_link(url)
-        if is_bitlink(url):
+        if is_bitlink(token, url):
             try:
                 total_clicks = count_clicks(token, url)
                 print('Clicks', total_clicks)
